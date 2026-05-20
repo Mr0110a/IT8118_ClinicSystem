@@ -1,0 +1,91 @@
+@model Appointment
+@{
+    ViewData["Title"] = $"Appointment {Model.ReferenceCode}";
+    var allowed = (IEnumerable<AppointmentStatus>)ViewBag.AllowedTransitions;
+}
+
+<h1 class="mb-3"><i class="bi bi-calendar-event"></i> Appointment <code>@Model.ReferenceCode</code></h1>
+
+<div class="row g-3">
+    <div class="col-md-6"><div class="card p-3">
+        <dl class="mb-0">
+            <dt>Status</dt><dd><span class="status-badge status-@Model.Status">@Model.Status</span></dd>
+            <dt>Date &amp; time</dt><dd>@Model.DateTimeStart.ToString("f") – @Model.DateTimeEnd.ToString("t")</dd>
+            <dt>Patient</dt><dd>@Model.Patient?.FullName <small class="text-muted">(CPR @Model.Patient?.CPR)</small></dd>
+            <dt>Doctor</dt><dd>
+                @Model.Doctor?.FullName
+                @if (Model.Doctor?.Specializations != null)
+                {
+                    foreach (var s in Model.Doctor.Specializations) { <span class="badge bg-info text-dark ms-1">@s.Specialization?.Name</span> }
+                }
+            </dd>
+            @if (!string.IsNullOrWhiteSpace(Model.Notes))
+            {
+                <dt>Notes</dt><dd>@Model.Notes</dd>
+            }
+        </dl>
+    </div></div>
+
+    <div class="col-md-6"><div class="card p-3">
+        <h5><i class="bi bi-arrow-right-circle"></i> Lifecycle</h5>
+        @if (allowed.Any())
+        {
+            <div class="d-flex flex-wrap gap-2">
+                @foreach (var s in allowed)
+                {
+                    <form asp-action="ChangeStatus" asp-route-id="@Model.Id" method="post"
+                          onsubmit="return confirm('Change status to @s?')">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="newStatus" value="@s" />
+                        <button class="btn btn-outline-primary btn-sm">Move to @s</button>
+                    </form>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="text-muted mb-0">No further transitions allowed from this state.</p>
+        }
+
+        @if (Model.Status == AppointmentStatus.Completed && (User.IsInRole("Doctor") || User.IsInRole("ClinicManager")))
+        {
+            <hr/>
+            <a class="btn btn-primary" asp-controller="Visits" asp-action="Edit" asp-route-appointmentId="@Model.Id">
+                <i class="bi bi-file-earmark-medical"></i>
+                @(Model.VisitRecord == null ? "Record visit / prescriptions" : "Update visit / prescriptions")
+            </a>
+        }
+    </div></div>
+
+    @if (Model.VisitRecord != null && (User.IsInRole("Doctor") || User.IsInRole("Patient") || User.IsInRole("ClinicManager") || User.IsInRole("Receptionist")))
+    {
+        <div class="col-12"><div class="card p-3">
+            <h5><i class="bi bi-clipboard2-pulse"></i> Visit record</h5>
+            <dl>
+                <dt>Diagnosis</dt><dd>@(Model.VisitRecord.Diagnosis ?? "—")</dd>
+                <dt>Treatment</dt><dd>@(Model.VisitRecord.Treatment ?? "—")</dd>
+                <dt>Doctor's notes</dt><dd>@(Model.VisitRecord.DoctorNotes ?? "—")</dd>
+            </dl>
+            @if (Model.VisitRecord.Prescriptions.Any())
+            {
+                <h6>Prescriptions</h6>
+                <table class="table table-sm">
+                    <thead><tr><th>Medication</th><th>Dosage</th><th>Frequency</th><th>Duration</th><th>Instructions</th></tr></thead>
+                    <tbody>
+                        @foreach (var p in Model.VisitRecord.Prescriptions)
+                        {
+                            <tr>
+                                <td><strong>@p.MedicationName</strong></td>
+                                <td>@p.Dosage</td><td>@p.Frequency</td><td>@p.Duration</td><td>@p.Instructions</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div></div>
+    }
+</div>
+
+<div class="mt-3">
+    <a class="btn btn-link" asp-action="Index">&laquo; Back to list</a>
+</div>

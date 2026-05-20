@@ -1,0 +1,94 @@
+@model BookAppointmentViewModel
+@{
+    ViewData["Title"] = "Book Appointment";
+    var specs    = (List<Specialization>)ViewBag.Specializations;
+    var patients = ViewBag.Patients as List<Patient>;
+}
+
+<h1 class="mb-3"><i class="bi bi-calendar-plus"></i> Book an Appointment</h1>
+
+<div class="card p-4">
+    <form asp-action="Book" method="post">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger" style="@(ViewData.ModelState.ErrorCount > 0 ? "" : "display:none")"></div>
+
+        @if (patients != null)
+        {
+            <div class="mb-3">
+                <label asp-for="PatientId" class="form-label">Patient</label>
+                <select asp-for="PatientId" class="form-select">
+                    <option value="">— pick a patient —</option>
+                    @foreach (var p in patients)
+                    {
+                        <option value="@p.Id">@p.FullName (@p.CPR)</option>
+                    }
+                </select>
+                <span asp-validation-for="PatientId" class="text-danger small"></span>
+            </div>
+        }
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="SpecializationId" class="form-label"></label>
+                <select asp-for="SpecializationId" class="form-select" id="specSelect">
+                    <option value="">— select specialization —</option>
+                    @foreach (var s in specs)
+                    {
+                        <option value="@s.Id">@s.Name</option>
+                    }
+                </select>
+                <span asp-validation-for="SpecializationId" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="DoctorId" class="form-label"></label>
+                <select asp-for="DoctorId" class="form-select" id="doctorSelect" disabled>
+                    <option value="">— pick a specialization first —</option>
+                </select>
+                <span asp-validation-for="DoctorId" class="text-danger small"></span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="DateTimeStart" class="form-label"></label>
+                <input asp-for="DateTimeStart" type="datetime-local" class="form-control"
+                       value="@Model.DateTimeStart.ToString("yyyy-MM-ddTHH:mm")" />
+                <span asp-validation-for="DateTimeStart" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="DateTimeEnd" class="form-label"></label>
+                <input asp-for="DateTimeEnd" type="datetime-local" class="form-control"
+                       value="@Model.DateTimeEnd.ToString("yyyy-MM-ddTHH:mm")" />
+                <span asp-validation-for="DateTimeEnd" class="text-danger small"></span>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Notes" class="form-label"></label>
+            <textarea asp-for="Notes" class="form-control" rows="2"></textarea>
+        </div>
+
+        <button class="btn btn-primary" type="submit"><i class="bi bi-check2-circle"></i> Confirm booking</button>
+        <a class="btn btn-link" asp-action="Index">Cancel</a>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Load doctors for the selected specialization (AJAX)
+        const specSel = document.getElementById('specSelect');
+        const docSel  = document.getElementById('doctorSelect');
+        specSel.addEventListener('change', async function () {
+            docSel.innerHTML = '<option value="">— loading —</option>';
+            docSel.disabled = true;
+            if (!this.value) { docSel.innerHTML = '<option value="">— pick a specialization first —</option>'; return; }
+            const r = await fetch('@Url.Action("BySpecialization", "Doctors")?specializationId=' + this.value);
+            const data = await r.json();
+            if (!data.length) { docSel.innerHTML = '<option value="">No doctors available</option>'; return; }
+            docSel.innerHTML = '<option value="">— select doctor —</option>'
+                + data.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+            docSel.disabled = false;
+        });
+    </script>
+}

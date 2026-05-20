@@ -1,0 +1,21 @@
+/* IT8118 Clinic MVC — site-wide styles */
+body { background: #f6f8fa; }
+.navbar-brand { letter-spacing: .5px; }
+.card { border: 0; box-shadow: 0 2px 6px rgba(0,0,0,.05); }
+.card-header { background: #fff; border-bottom: 1px solid #eef; font-weight: 600; }
+.status-badge {
+    font-size: .78rem; padding: .35em .7em; border-radius: 999px;
+    display: inline-block; font-weight: 500;
+}
+.status-Requested  { background:#fef3c7; color:#92400e; }
+.status-Confirmed  { background:#dbeafe; color:#1e40af; }
+.status-CheckedIn  { background:#e0e7ff; color:#3730a3; }
+.status-InProgress { background:#fde68a; color:#78350f; }
+.status-Completed  { background:#d1fae5; color:#065f46; }
+.status-Cancelled  { background:#fee2e2; color:#991b1b; }
+.status-Missed     { background:#f3f4f6; color:#4b5563; }
+.live-row-new      { animation: flash 1.4s ease; }
+@keyframes flash { 0% { background:#fff3cd; } 100% { background:transparent; } }
+.dashboard-stat { font-size: 2rem; font-weight: 600; }
+.dashboard-stat-label { font-size:.85rem; color:#666; text-transform:uppercase; letter-spacing: .5px; }
+.prescription-row { background:#f9fafb; border:1px solid #e5e7eb; border-radius:.5rem; padding:.75rem; margin-bottom:.5rem; }

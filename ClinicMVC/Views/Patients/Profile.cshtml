@@ -1,0 +1,79 @@
+@model Patient
+@{ ViewData["Title"] = Model.FullName; }
+
+<h1 class="mb-3"><i class="bi bi-person-vcard"></i> @Model.FullName</h1>
+
+<div class="row g-3">
+    <div class="col-md-4"><div class="card p-3">
+        <dl class="mb-0">
+            <dt>CPR</dt><dd><code>@Model.CPR</code></dd>
+            <dt>Reference No.</dt><dd><code>@Model.ReferenceNumber</code></dd>
+            <dt>Phone</dt><dd>@Model.Phone</dd>
+            <dt>Email</dt><dd>@Model.Email</dd>
+            <dt>Date of birth</dt><dd>@Model.DateOfBirth.ToShortDateString()</dd>
+            <dt>Address</dt><dd>@Model.Address</dd>
+            <dt>Emergency contact</dt><dd>@Model.EmergencyContact</dd>
+        </dl>
+    </div></div>
+
+    <div class="col-md-8"><div class="card p-3">
+        <h5><i class="bi bi-journal-medical"></i> Visit history (@Model.Appointments.Count(a => a.VisitRecord != null) visits)</h5>
+        @{
+            var withRecords = Model.Appointments.Where(a => a.VisitRecord != null)
+                .OrderByDescending(a => a.DateTimeStart).ToList();
+        }
+        @if (!withRecords.Any())
+        {
+            <p class="text-muted">No past visits with recorded notes yet.</p>
+        }
+        @foreach (var a in withRecords)
+        {
+            <div class="border-bottom py-3">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <strong>@a.DateTimeStart.ToString("D")</strong>
+                        — Dr. @a.Doctor?.FullName
+                    </div>
+                    <span class="status-badge status-@a.Status">@a.Status</span>
+                </div>
+                <dl class="row mb-0 small mt-2">
+                    <dt class="col-sm-3">Diagnosis</dt><dd class="col-sm-9">@a.VisitRecord?.Diagnosis</dd>
+                    <dt class="col-sm-3">Treatment</dt><dd class="col-sm-9">@a.VisitRecord?.Treatment</dd>
+                </dl>
+                @if (a.VisitRecord?.Prescriptions.Any() == true)
+                {
+                    <details class="mt-2">
+                        <summary class="small text-primary">@a.VisitRecord.Prescriptions.Count prescription(s)</summary>
+                        <ul class="small mb-0 mt-1">
+                            @foreach (var p in a.VisitRecord.Prescriptions)
+                            {
+                                <li><strong>@p.MedicationName</strong> — @p.Dosage @p.Frequency for @p.Duration. @p.Instructions</li>
+                            }
+                        </ul>
+                    </details>
+                }
+            </div>
+        }
+    </div></div>
+
+    <div class="col-12"><div class="card p-3">
+        <h5><i class="bi bi-calendar3"></i> All appointments</h5>
+        <table class="table table-sm mb-0">
+            <thead><tr><th>Ref</th><th>When</th><th>Doctor</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+                @foreach (var a in Model.Appointments.OrderByDescending(x => x.DateTimeStart))
+                {
+                    <tr>
+                        <td><code>@a.ReferenceCode</code></td>
+                        <td>@a.DateTimeStart.ToString("g")</td>
+                        <td>@a.Doctor?.FullName</td>
+                        <td><span class="status-badge status-@a.Status">@a.Status</span></td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-secondary" asp-controller="Appointments" asp-action="Details" asp-route-id="@a.Id">View</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div></div>
+</div>

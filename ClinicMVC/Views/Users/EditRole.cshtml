@@ -1,0 +1,38 @@
+@model EditUserRoleViewModel
+@{
+    ViewData["Title"] = "Change Role";
+    var allRoles = (List<string>)ViewBag.AllRoles;
+}
+
+<h1 class="mb-3"><i class="bi bi-shield"></i> Change User Role</h1>
+
+<div class="card p-4">
+    <dl class="mb-3">
+        <dt>User</dt><dd>@Model.FullName (@Model.Email)</dd>
+        <dt>Current role</dt><dd><span class="badge bg-secondary">@Model.CurrentRole</span></dd>
+    </dl>
+
+    <form asp-action="EditRole" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="UserId" />
+        <input type="hidden" asp-for="Email" />
+        <input type="hidden" asp-for="FullName" />
+        <input type="hidden" asp-for="CurrentRole" />
+
+        <div class="mb-3">
+            <label asp-for="NewRole" class="form-label"></label>
+            <select asp-for="NewRole" class="form-select">
+                @foreach (var r in allRoles)
+                {
+                    <option value="@r" selected="@(r == Model.CurrentRole)">@r</option>
+                }
+            </select>
+            <span asp-validation-for="NewRole" class="text-danger small"></span>
+        </div>
+
+        <button class="btn btn-primary" type="submit">Save</button>
+        <a class="btn btn-link" asp-action="Index">Cancel</a>
+    </form>
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

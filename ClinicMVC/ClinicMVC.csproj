@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>clinic-mvc-secrets-9b3a8e2c</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="9.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Project reference: MVC uses the API project as the shared data layer
+         (domain models, DbContext, Identity user). Per the brief, the only
+         feature in this MVC app that consumes the API via HttpClient is the
+         public tracking/lookup page; everything else uses EF Core directly. -->
+    <ProjectReference Include="..\ClinicAPI\ClinicAPI.csproj" />
+  </ItemGroup>
+
+</Project>

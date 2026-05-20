@@ -1,0 +1,61 @@
+@model DoctorCreateViewModel
+@{ ViewData["Title"] = "Add Doctor"; var specs = (List<Specialization>)ViewBag.Specializations; }
+
+<h1 class="mb-3"><i class="bi bi-person-plus"></i> Add Doctor</h1>
+
+<div class="card p-4">
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger" style="@(ViewData.ModelState.ErrorCount > 0 ? "" : "display:none")"></div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="FullName" class="form-label"></label>
+                <input asp-for="FullName" class="form-control" />
+                <span asp-validation-for="FullName" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="LicenseNumber" class="form-label"></label>
+                <input asp-for="LicenseNumber" class="form-control" />
+                <span asp-validation-for="LicenseNumber" class="text-danger small"></span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="Phone" class="form-label"></label>
+                <input asp-for="Phone" class="form-control" />
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Password" class="form-label"></label>
+            <input asp-for="Password" class="form-control" />
+            <span asp-validation-for="Password" class="text-danger small"></span>
+            <div class="form-text">The doctor will use this temporary password to sign in for the first time.</div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Specializations</label>
+            <div>
+                @foreach (var s in specs)
+                {
+                    <div class="form-check form-check-inline">
+                        <input type="checkbox" name="SpecializationIds" value="@s.Id" class="form-check-input" id="spec-@s.Id" />
+                        <label class="form-check-label" for="spec-@s.Id">@s.Name</label>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <button class="btn btn-primary" type="submit">Create doctor</button>
+        <a class="btn btn-link" asp-action="Index">Cancel</a>
+    </form>
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

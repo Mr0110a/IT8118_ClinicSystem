@@ -1,0 +1,112 @@
+﻿@model ClinicReports.Models.AppointmentStatsDto
+@{
+    ViewData["Title"] = "Executive Metrics Dashboard";
+    var utilisation = ViewBag.UtilisationData as List<ClinicReports.Models.DoctorUtilisationDto>;
+    var cancellations = ViewBag.CancellationData as List<ClinicReports.Models.CancellationRateDto>;
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 text-dark fw-bold">Operations Reporting</h1>
+        <span class="badge bg-success px-3 py-2 fs-6">System Connected via Secure API Channel</span>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm bg-primary text-white p-3">
+                <small class="text-uppercase font-weight-bold opacity-75">Total Tracked Bookings</small>
+                <h2 class="display-6 fw-bold">@Model?.TotalAppointments</h2>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm bg-success text-white p-3">
+                <small class="text-uppercase font-weight-bold opacity-75">Fulfilled Evaluations</small>
+                <h2 class="display-6 fw-bold">@Model?.Completed</h2>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm bg-warning text-dark p-3">
+                <small class="text-uppercase font-weight-bold opacity-75">Patient Cancelled Cancellations</small>
+                <h2 class="display-6 fw-bold">@Model?.Cancelled</h2>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm bg-danger text-white p-3">
+                <small class="text-uppercase font-weight-bold opacity-75">No-Show Missed Slots</small>
+                <h2 class="display-6 fw-bold">@Model?.Missed</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3 border-0">
+                    <h5 class="card-title mb-0 fw-bold text-secondary">Doctor Allocation & Capacity Utilization Metrics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Medical Professional</th>
+                                    <th>Speciality Field</th>
+                                    <th class="text-center">Allocated Slots</th>
+                                    <th class="text-center">Booked Occupancy</th>
+                                    <th>Utilization Performance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (utilisation != null)
+                                {
+                                    foreach (var doc in utilisation)
+                                    {
+                                        <tr>
+                                            <td class="fw-semibold">@doc.DoctorName</td>
+                                            <td><span class="badge bg-light text-dark border">@doc.Specialization</span></td>
+                                            <td class="text-center">@doc.AvailableSlots</td>
+                                            <td class="text-center">@doc.BookedSlots</td>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <div class="progress w-100" style="height: 6px;">
+                                                        <div class="progress-bar @(doc.UtilisationPercentage > 80 ? "bg-danger" : "bg-primary")" style="width: @doc.UtilisationPercentage%"></div>
+                                                    </div>
+                                                    <small class="fw-bold">@doc.UtilisationPercentage.ToString("0")%</small>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3 border-0">
+                    <h5 class="card-title mb-0 fw-bold text-secondary">Historical Operational Stability</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        @if (cancellations != null)
+                        {
+                            foreach (var item in cancellations)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-start py-3 border-0 px-0">
+                                    <div class="ms-2 me-auto">
+                                        <div class="fw-bold text-dark">@item.Month</div>
+                                        <small class="text-muted">Bookings processed: @item.TotalBooked | Discarded: @item.TotalCancelled</small>
+                                    </div>
+                                    <span class="badge bg-danger rounded-pill px-3 py-2">@item.RatePercentage.ToString("0.0")% Loss</span>
+                                </li>
+                            }
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

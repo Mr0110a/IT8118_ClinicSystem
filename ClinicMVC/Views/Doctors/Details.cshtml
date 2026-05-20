@@ -1,0 +1,104 @@
+@model Doctor
+@{ ViewData["Title"] = Model.FullName; }
+@{ string[] days = { "Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday" }; }
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1><i class="bi bi-person-badge"></i> @Model.FullName</h1>
+    <div>
+        @if (User.IsInRole("ClinicManager"))
+        {
+            <a class="btn btn-outline-primary" asp-action="Edit" asp-route-id="@Model.Id"><i class="bi bi-pencil"></i> Edit</a>
+            <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-inline" onsubmit="return confirm('Delete this doctor?')">
+                @Html.AntiForgeryToken()
+                <button class="btn btn-outline-danger"><i class="bi bi-trash"></i> Delete</button>
+            </form>
+        }
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-4"><div class="card p-3">
+        <dl class="mb-0">
+            <dt>Licence</dt><dd><code>@Model.LicenseNumber</code></dd>
+            <dt>Email</dt><dd>@Model.Email</dd>
+            <dt>Phone</dt><dd>@Model.Phone</dd>
+            <dt>Specializations</dt>
+            <dd>
+                @foreach (var s in Model.Specializations) {<span class="badge bg-info text-dark me-1">@s.Specialization?.Name</span>}
+            </dd>
+        </dl>
+    </div></div>
+
+    <div class="col-md-8"><div class="card p-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-calendar-week"></i> Weekly schedule</h5>
+            @if (User.IsInRole("ClinicManager"))
+            {
+                <a class="btn btn-sm btn-outline-primary" asp-action="AddSchedule" asp-route-doctorId="@Model.Id"><i class="bi bi-plus-lg"></i> Add slot</a>
+            }
+        </div>
+        <table class="table table-sm mt-3 mb-0">
+            <thead><tr><th>Day</th><th>From</th><th>To</th><th></th><th></th></tr></thead>
+            <tbody>
+                @if (!Model.Schedules.Any())
+                {
+                    <tr><td colspan="5" class="text-center text-muted py-2">No schedule set.</td></tr>
+                }
+                @foreach (var s in Model.Schedules.OrderBy(x => x.DayOfWeek).ThenBy(x => x.StartTime))
+                {
+                    <tr>
+                        <td>@days[s.DayOfWeek]</td>
+                        <td>@s.StartTime.ToString(@"hh\:mm")</td>
+                        <td>@s.EndTime.ToString(@"hh\:mm")</td>
+                        <td>@(s.IsActive ? "Active" : "Inactive")</td>
+                        <td class="text-end">
+                            @if (User.IsInRole("ClinicManager"))
+                            {
+                                <form asp-action="DeleteSchedule" asp-route-id="@s.Id" method="post" onsubmit="return confirm('Remove this schedule slot?')">
+                                    @Html.AntiForgeryToken()
+                                    <button class="btn btn-sm btn-outline-danger">Remove</button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div></div>
+
+    <div class="col-12"><div class="card p-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-airplane"></i> Leave / time off</h5>
+            @if (User.IsInRole("ClinicManager"))
+            {
+                <a class="btn btn-sm btn-outline-primary" asp-action="AddLeave" asp-route-doctorId="@Model.Id"><i class="bi bi-plus-lg"></i> Add leave</a>
+            }
+        </div>
+        <table class="table table-sm mt-3 mb-0">
+            <thead><tr><th>From</th><th>To</th><th>Reason</th><th></th></tr></thead>
+            <tbody>
+                @if (!Model.Leaves.Any())
+                {
+                    <tr><td colspan="4" class="text-center text-muted py-2">No leave recorded.</td></tr>
+                }
+                @foreach (var l in Model.Leaves.OrderBy(x => x.StartDate))
+                {
+                    <tr>
+                        <td>@l.StartDate.ToShortDateString()</td>
+                        <td>@l.EndDate.ToShortDateString()</td>
+                        <td>@l.Reason</td>
+                        <td class="text-end">
+                            @if (User.IsInRole("ClinicManager"))
+                            {
+                                <form asp-action="DeleteLeave" asp-route-id="@l.Id" method="post" onsubmit="return confirm('Remove this leave?')">
+                                    @Html.AntiForgeryToken()
+                                    <button class="btn btn-sm btn-outline-danger">Remove</button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div></div>
+</div>

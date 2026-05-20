@@ -1,0 +1,66 @@
+@model TrackingResultViewModel
+@{ ViewData["Title"] = "Lookup result"; }
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1><i class="bi bi-search"></i> Lookup result</h1>
+    <a class="btn btn-outline-secondary" asp-action="Index">
+        <i class="bi bi-arrow-left"></i> New lookup
+    </a>
+</div>
+
+@if (!Model.Found)
+{
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle"></i>
+        @(Model.ErrorMessage ?? "No record found.")
+    </div>
+    <a class="btn btn-primary" asp-action="Index">Try another lookup</a>
+}
+else
+{
+    <div class="card p-3 mb-3">
+        <h5 class="mb-0">
+            <i class="bi bi-person-check"></i>
+            Patient: <strong>@Model.PatientName</strong>
+        </h5>
+    </div>
+
+    <div class="card p-3 mb-3">
+        <h5><i class="bi bi-calendar3"></i> Appointment(s)</h5>
+        @if (!Model.Appointments.Any())
+        {
+            <p class="text-muted mb-0">No appointments matched.</p>
+        }
+        else
+        {
+            <table class="table table-sm mb-0">
+                <thead>
+                    <tr><th>Ref</th><th>When</th><th>Doctor</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in Model.Appointments)
+                    {
+                        <tr>
+                            <td><code>@a.ReferenceCode</code></td>
+                            <td>@a.StartTime.ToString("f")</td>
+                            <td>@a.DoctorName</td>
+                            <td><span class="status-badge status-@a.Status">@a.Status</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+
+    @if (Model.LastVisit != null)
+    {
+        <div class="card p-3">
+            <h5><i class="bi bi-clipboard2-pulse"></i> Last visit summary</h5>
+            <dl class="mb-0">
+                <dt>Visit date</dt><dd>@Model.LastVisit.VisitDate.ToString("D")</dd>
+                <dt>Diagnosis</dt><dd>@(Model.LastVisit.Diagnosis ?? "—")</dd>
+                <dt>Treatment</dt><dd>@(Model.LastVisit.Treatment ?? "—")</dd>
+            </dl>
+        </div>
+    }
+}

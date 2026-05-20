@@ -1,0 +1,48 @@
+@model TrackingLookupViewModel
+@{ ViewData["Title"] = "Public Appointment Lookup"; }
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card p-4">
+            <div class="text-center mb-3">
+                <i class="bi bi-search text-primary" style="font-size: 3rem"></i>
+                <h2 class="mt-2">Public Appointment Lookup</h2>
+                <p class="text-muted small mb-0">
+                    No account needed. Enter your CPR number and the 8-character appointment
+                    reference code to view your status and last visit summary.
+                </p>
+            </div>
+
+            <form asp-action="Lookup" method="post">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" style="@(ViewData.ModelState.ErrorCount > 0 ? "" : "display:none")"></div>
+
+                <div class="mb-3">
+                    <label asp-for="CPR" class="form-label"></label>
+                    <input asp-for="CPR" class="form-control form-control-lg"
+                           placeholder="e.g. 1234567890" />
+                    <span asp-validation-for="CPR" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ReferenceCode" class="form-label"></label>
+                    <input asp-for="ReferenceCode" class="form-control form-control-lg text-uppercase"
+                           placeholder="e.g. A1B2C3D4" maxlength="8" />
+                    <span asp-validation-for="ReferenceCode" class="text-danger small"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg w-100">
+                    <i class="bi bi-search"></i> Look up
+                </button>
+            </form>
+
+            <div class="alert alert-info small mt-3 mb-0">
+                <i class="bi bi-info-circle"></i>
+                This page calls the Web API via <code>HttpClient</code>. All other features
+                in this app access the database directly through EF Core, per the assessment brief.
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

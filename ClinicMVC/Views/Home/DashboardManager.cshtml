@@ -1,0 +1,38 @@
+@{ ViewData["Title"] = "Manager Dashboard"; }
+<h1 class="mb-4"><i class="bi bi-speedometer2"></i> Clinic Overview</h1>
+
+<div class="row g-3">
+    <div class="col-md-3"><div class="card p-3 text-center">
+        <div class="dashboard-stat-label">Doctors</div>
+        <div class="dashboard-stat text-primary">@ViewBag.TotalDoctors</div>
+    </div></div>
+    <div class="col-md-3"><div class="card p-3 text-center">
+        <div class="dashboard-stat-label">Patients</div>
+        <div class="dashboard-stat text-success">@ViewBag.TotalPatients</div>
+    </div></div>
+    <div class="col-md-3"><div class="card p-3 text-center">
+        <div class="dashboard-stat-label">Today's Appts</div>
+        <div class="dashboard-stat text-info">@ViewBag.TodayAppointments</div>
+    </div></div>
+    <div class="col-md-3"><div class="card p-3 text-center">
+        <div class="dashboard-stat-label">All Appointments</div>
+        <div class="dashboard-stat text-dark">@ViewBag.TotalAppointments</div>
+    </div></div>
+</div>
+
+<div class="row mt-4 g-3">
+    <div class="col-md-6"><div class="card p-4">
+        <h5><i class="bi bi-list-task"></i> Quick actions</h5>
+        <div class="d-grid gap-2">
+            <a class="btn btn-outline-primary" asp-controller="Doctors" asp-action="Create">Add a doctor</a>
+            <a class="btn btn-outline-primary" asp-controller="Users" asp-action="Index">Manage users &amp; roles</a>
+            <a class="btn btn-outline-primary" asp-controller="LiveBoard" asp-action="Index">Live appointment board</a>
+        </div>
+    </div></div>
+    <div class="col-md-6"><div class="card p-4">
+        <h5><i class="bi bi-info-circle"></i> System info</h5>
+        <p class="text-muted small mb-1">For operational reports (cancellation rate, doctor utilisation,
+            daily summary) use the separate Reporting Application — it consumes the Web API exclusively
+            with JWT authentication.</p>
+    </div></div>
+</div>

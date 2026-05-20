@@ -1,0 +1,164 @@
+@inject UserManager<ApplicationUser> UserManager
+@{
+    var isAuthed = User.Identity?.IsAuthenticated ?? false;
+    var role     = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value;
+    var fullName = User.Claims.FirstOrDefault(c => c.Type == "FullName")?.Value ?? User.Identity?.Name;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] · Bahrain Clinic</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">
+            <i class="bi bi-hospital me-2"></i>Bahrain Clinic
+        </a>
+        <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#nav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="nav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Home</a></li>
+
+                @if (isAuthed)
+                {
+                    <li class="nav-item"><a class="nav-link" asp-controller="Appointments" asp-action="Index">Appointments</a></li>
+
+                    @if (User.IsInRole("Patient") || User.IsInRole("Receptionist"))
+                    {
+                        <li class="nav-item"><a class="nav-link" asp-controller="Appointments" asp-action="Book">Book Appointment</a></li>
+                    }
+
+                    @if (User.IsInRole("Patient"))
+                    {
+                        <li class="nav-item"><a class="nav-link" asp-controller="Patients" asp-action="Profile">My Profile</a></li>
+                    }
+
+                    @if (User.IsInRole("Doctor") || User.IsInRole("Receptionist") || User.IsInRole("ClinicManager"))
+                    {
+                        <li class="nav-item"><a class="nav-link" asp-controller="Patients" asp-action="Index">Patients</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Doctors" asp-action="Index">Doctors</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="LiveBoard" asp-action="Index"><i class="bi bi-broadcast"></i> Live Board</a></li>
+                    }
+
+                    @if (User.IsInRole("ClinicManager"))
+                    {
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Manage</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" asp-controller="Doctors" asp-action="Create">Add Doctor</a></li>
+                                <li><a class="dropdown-item" asp-controller="Users"   asp-action="Index">User Management</a></li>
+                            </ul>
+                        </li>
+                    }
+                }
+
+                <li class="nav-item"><a class="nav-link" asp-controller="Tracking" asp-action="Index">Public Lookup</a></li>
+            </ul>
+
+            <ul class="navbar-nav">
+                @if (isAuthed)
+                {
+                    <li class="nav-item me-3">
+                        <a class="nav-link position-relative" asp-controller="Notifications" asp-action="Index" title="Notifications">
+                            <i class="bi bi-bell-fill fs-5"></i>
+                            <span id="notifBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display:none">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle me-1"></i>@fullName <span class="badge bg-light text-dark ms-1">@role</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><span class="dropdown-item-text text-muted small">@User.Identity?.Name</span></li>
+                            <li><hr class="dropdown-divider"/></li>
+                            <li>
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="px-3">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-outline-danger btn-sm w-100">Sign out</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                }
+                else
+                {
+                    <li class="nav-item"><a class="nav-link" asp-controller="Account" asp-action="Login">Sign in</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Account" asp-action="Register">Register</a></li>
+                }
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<main class="container py-4">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @RenderBody()
+</main>
+
+<footer class="border-top text-center text-muted py-3 mt-5">
+    <small>&copy; @DateTime.UtcNow.Year Bahrain Polytechnic Clinic — IT8118 Semester B 2025-26</small>
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.20.0/dist/jquery.validate.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@4.0.0/dist/jquery.validate.unobtrusive.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+
+@if (isAuthed)
+{
+    <script>
+        // Initialise notification bell + live SignalR push
+        (function () {
+            function updateBadge(count) {
+                const b = document.getElementById('notifBadge');
+                if (!b) return;
+                if (count > 0) { b.style.display = ''; b.textContent = count; }
+                else { b.style.display = 'none'; }
+            }
+
+            // Initial unread count
+            fetch('@Url.Action("UnreadCount", "Notifications")', { credentials: 'same-origin' })
+                .then(r => r.json()).then(d => updateBadge(d.count)).catch(()=>{});
+
+            // SignalR live push
+            try {
+                const conn = new signalR.HubConnectionBuilder()
+                    .withUrl('/hubs/notifications')
+                    .withAutomaticReconnect()
+                    .build();
+                conn.on('NewNotification', () => {
+                    fetch('@Url.Action("UnreadCount", "Notifications")', { credentials: 'same-origin' })
+                        .then(r => r.json()).then(d => updateBadge(d.count));
+                });
+                conn.start().catch(err => console.warn('SignalR (notifications):', err));
+            } catch (e) { console.warn(e); }
+        })();
+    </script>
+}
+
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

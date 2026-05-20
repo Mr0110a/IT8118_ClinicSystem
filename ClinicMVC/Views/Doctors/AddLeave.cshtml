@@ -1,0 +1,37 @@
+@model LeaveViewModel
+@{ ViewData["Title"] = "Add Leave"; }
+
+<h1 class="mb-3"><i class="bi bi-airplane"></i> Record leave / time off</h1>
+
+<div class="alert alert-warning small">
+    <i class="bi bi-info-circle"></i> Any active appointments falling inside the leave window
+    will be auto-cancelled and the affected patients notified.
+</div>
+
+<div class="card p-4">
+    <form asp-action="AddLeave" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="DoctorId" />
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger" style="@(ViewData.ModelState.ErrorCount > 0 ? "" : "display:none")"></div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="StartDate" class="form-label"></label>
+                <input asp-for="StartDate" class="form-control" type="date" />
+                <span asp-validation-for="StartDate" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="EndDate" class="form-label"></label>
+                <input asp-for="EndDate" class="form-control" type="date" />
+                <span asp-validation-for="EndDate" class="text-danger small"></span>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Reason" class="form-label"></label>
+            <input asp-for="Reason" class="form-control" />
+        </div>
+        <button class="btn btn-primary" type="submit">Save leave</button>
+        <a class="btn btn-link" asp-action="Details" asp-route-id="@Model.DoctorId">Cancel</a>
+    </form>
+</div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

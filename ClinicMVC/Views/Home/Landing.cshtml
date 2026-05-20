@@ -1,0 +1,40 @@
+@{ ViewData["Title"] = "Welcome"; }
+
+<div class="row align-items-center py-4">
+    <div class="col-lg-6">
+        <h1 class="display-5 fw-bold text-primary">Healthcare made simple.</h1>
+        <p class="lead text-muted">
+            Bahrain Clinic's online appointment system. Book visits, track your medical history,
+            and look up appointments — all in one place.
+        </p>
+        <div class="mt-4">
+            <a class="btn btn-primary btn-lg me-2" asp-controller="Account" asp-action="Register">Create Account</a>
+            <a class="btn btn-outline-primary btn-lg me-2" asp-controller="Account" asp-action="Login">Sign In</a>
+            <a class="btn btn-link" asp-controller="Tracking" asp-action="Index">Public Appointment Lookup &raquo;</a>
+        </div>
+    </div>
+    <div class="col-lg-6 text-center">
+        <i class="bi bi-clipboard2-pulse text-primary" style="font-size: 16rem; opacity: .15;"></i>
+    </div>
+</div>
+
+<div class="row mt-5 g-3">
+    <div class="col-md-4">
+        <div class="card p-4 h-100"><i class="bi bi-calendar-check fs-1 text-primary"></i>
+            <h5 class="mt-2">Easy booking</h5>
+            <p class="text-muted small mb-0">Pick your specialty and doctor, see live availability.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-4 h-100"><i class="bi bi-file-earmark-medical fs-1 text-primary"></i>
+            <h5 class="mt-2">Full visit history</h5>
+            <p class="text-muted small mb-0">Diagnoses, prescriptions, and notes always in one place.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-4 h-100"><i class="bi bi-bell fs-1 text-primary"></i>
+            <h5 class="mt-2">Real-time alerts</h5>
+            <p class="text-muted small mb-0">In-app notifications and a live status board for staff.</p>
+        </div>
+    </div>
+</div>

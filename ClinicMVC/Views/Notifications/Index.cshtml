@@ -1,0 +1,65 @@
+@model IEnumerable<Notification>
+@{ ViewData["Title"] = "Notifications"; }
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1><i class="bi bi-bell-fill"></i> Notifications</h1>
+    @if (Model.Any(n => !n.IsRead))
+    {
+        <form asp-action="MarkAllRead" method="post" class="m-0">
+            @Html.AntiForgeryToken()
+            <button class="btn btn-outline-secondary btn-sm"><i class="bi bi-check2-all"></i> Mark all as read</button>
+        </form>
+    }
+</div>
+
+<div class="card">
+    @if (!Model.Any())
+    {
+        <div class="p-4 text-center text-muted">
+            <i class="bi bi-inbox fs-1"></i>
+            <p class="mb-0 mt-2">You have no notifications.</p>
+        </div>
+    }
+    else
+    {
+        <ul class="list-group list-group-flush">
+            @foreach (var n in Model)
+            {
+                <li class="list-group-item @(n.IsRead ? "" : "bg-light")">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            @if (!n.IsRead)
+                            {
+                                <span class="badge bg-primary me-2">New</span>
+                            }
+                            <span>@n.Message</span>
+                            <div class="small text-muted mt-1">
+                                <i class="bi bi-clock"></i> @n.CreatedAt.ToString("g")
+                            </div>
+                        </div>
+                        <div>
+                            @if (n.RelatedAppointmentId.HasValue)
+                            {
+                                <form asp-action="MarkRead" asp-route-id="@n.Id" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-arrow-right-circle"></i> Open
+                                    </button>
+                                </form>
+                            }
+                            else if (!n.IsRead)
+                            {
+                                <form asp-action="MarkRead" asp-route-id="@n.Id" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-check2"></i> Mark read
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+</div>

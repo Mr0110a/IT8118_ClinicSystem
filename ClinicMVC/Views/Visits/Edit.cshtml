@@ -1,0 +1,84 @@
+@model VisitRecordViewModel
+@{ ViewData["Title"] = "Visit Record"; }
+
+<h1 class="mb-3"><i class="bi bi-clipboard2-pulse"></i> Visit record</h1>
+
+<div class="card p-4">
+    <div class="mb-3 text-muted small">
+        <strong>Patient:</strong> @Model.PatientName ·
+        <strong>Doctor:</strong> @Model.DoctorName ·
+        <strong>Date:</strong> @Model.AppointmentDate.ToString("f")
+    </div>
+
+    <form asp-action="Edit" method="post" id="visitForm">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="AppointmentId" />
+        <input type="hidden" asp-for="VisitRecordId" />
+        <input type="hidden" asp-for="PatientName" />
+        <input type="hidden" asp-for="DoctorName" />
+        <input type="hidden" asp-for="AppointmentDate" />
+
+        <div class="mb-3">
+            <label asp-for="Diagnosis" class="form-label"></label>
+            <textarea asp-for="Diagnosis" class="form-control" rows="2"></textarea>
+            <span asp-validation-for="Diagnosis" class="text-danger small"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Treatment" class="form-label"></label>
+            <textarea asp-for="Treatment" class="form-control" rows="2"></textarea>
+            <span asp-validation-for="Treatment" class="text-danger small"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="DoctorNotes" class="form-label"></label>
+            <textarea asp-for="DoctorNotes" class="form-control" rows="3"></textarea>
+            <span asp-validation-for="DoctorNotes" class="text-danger small"></span>
+        </div>
+
+        <h5 class="mt-4"><i class="bi bi-capsule"></i> Prescriptions</h5>
+        <p class="small text-muted">Add a row for each medication. Leaving the medication name blank deletes the row on save.</p>
+
+        <div id="prescriptionRows">
+            @for (int i = 0; i < Model.Prescriptions.Count; i++)
+            {
+                <div class="prescription-row">
+                    <div class="row g-2">
+                        <div class="col-md-3"><input name="Prescriptions[@i].MedicationName" value="@Model.Prescriptions[i].MedicationName" class="form-control" placeholder="Medication" /></div>
+                        <div class="col-md-2"><input name="Prescriptions[@i].Dosage" value="@Model.Prescriptions[i].Dosage" class="form-control" placeholder="Dosage" /></div>
+                        <div class="col-md-2"><input name="Prescriptions[@i].Frequency" value="@Model.Prescriptions[i].Frequency" class="form-control" placeholder="Frequency" /></div>
+                        <div class="col-md-2"><input name="Prescriptions[@i].Duration" value="@Model.Prescriptions[i].Duration" class="form-control" placeholder="Duration" /></div>
+                        <div class="col-md-3"><input name="Prescriptions[@i].Instructions" value="@Model.Prescriptions[i].Instructions" class="form-control" placeholder="Instructions" /></div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <button type="button" class="btn btn-outline-secondary btn-sm" id="addRowBtn">
+            <i class="bi bi-plus-lg"></i> Add prescription row
+        </button>
+
+        <hr/>
+        <button class="btn btn-primary" type="submit">Save visit record</button>
+        <a class="btn btn-link" asp-controller="Appointments" asp-action="Details" asp-route-id="@Model.AppointmentId">Cancel</a>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        let rowIndex = @Model.Prescriptions.Count;
+        document.getElementById('addRowBtn').addEventListener('click', function () {
+            const html = `
+                <div class="prescription-row">
+                    <div class="row g-2">
+                        <div class="col-md-3"><input name="Prescriptions[${rowIndex}].MedicationName" class="form-control" placeholder="Medication" /></div>
+                        <div class="col-md-2"><input name="Prescriptions[${rowIndex}].Dosage" class="form-control" placeholder="Dosage" /></div>
+                        <div class="col-md-2"><input name="Prescriptions[${rowIndex}].Frequency" class="form-control" placeholder="Frequency" /></div>
+                        <div class="col-md-2"><input name="Prescriptions[${rowIndex}].Duration" class="form-control" placeholder="Duration" /></div>
+                        <div class="col-md-3"><input name="Prescriptions[${rowIndex}].Instructions" class="form-control" placeholder="Instructions" /></div>
+                    </div>
+                </div>`;
+            document.getElementById('prescriptionRows').insertAdjacentHTML('beforeend', html);
+            rowIndex++;
+        });
+    </script>
+}

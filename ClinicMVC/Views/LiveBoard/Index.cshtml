@@ -1,0 +1,114 @@
+@model IEnumerable<Appointment>
+@{ ViewData["Title"] = "Live Appointment Board"; }
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1><i class="bi bi-broadcast text-danger"></i> Live Appointment Board</h1>
+    <span class="badge bg-success p-2" id="connStatus">
+        <i class="bi bi-wifi"></i> Connecting...
+    </span>
+</div>
+
+<p class="text-muted small">
+    This waiting-room board updates in <strong>real time</strong> via SignalR whenever
+    appointment statuses change anywhere in the system. Today: @DateTime.UtcNow.ToString("D").
+</p>
+
+<div class="card">
+    <table class="table mb-0 align-middle" id="liveBoardTable">
+        <thead class="table-light">
+            <tr>
+                <th>Time</th>
+                <th>Ref</th>
+                <th>Patient</th>
+                <th>Doctor</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="liveBoardBody">
+            @if (!Model.Any())
+            {
+                <tr id="emptyRow">
+                    <td colspan="5" class="text-center text-muted py-4">
+                        No appointments on the board for today.
+                    </td>
+                </tr>
+            }
+            @foreach (var a in Model)
+            {
+                <tr data-id="@a.Id">
+                    <td>@a.DateTimeStart.ToString("t")</td>
+                    <td><code>@a.ReferenceCode</code></td>
+                    <td>@a.Patient?.FullName</td>
+                    <td>@a.Doctor?.FullName</td>
+                    <td><span class="status-badge status-@a.Status">@a.Status</span></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const conn = new signalR.HubConnectionBuilder()
+                .withUrl('/hubs/appointments')
+                .withAutomaticReconnect()
+                .build();
+
+            const status = document.getElementById('connStatus');
+            const body   = document.getElementById('liveBoardBody');
+
+            conn.onreconnecting(() => {
+                status.className = 'badge bg-warning p-2';
+                status.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Reconnecting...';
+            });
+            conn.onreconnected(() => {
+                status.className = 'badge bg-success p-2';
+                status.innerHTML = '<i class="bi bi-wifi"></i> Live';
+            });
+            conn.onclose(() => {
+                status.className = 'badge bg-secondary p-2';
+                status.innerHTML = '<i class="bi bi-wifi-off"></i> Disconnected';
+            });
+
+            conn.on('StatusChanged', function (msg) {
+                // Find the row by appointment id and update its status cell
+                let row = body.querySelector(`tr[data-id="${msg.id}"]`);
+                if (row) {
+                    const td = row.querySelector('td:last-child');
+                    td.innerHTML = `<span class="status-badge status-${msg.newStatus}">${msg.newStatus}</span>`;
+                    row.classList.remove('live-row-new');
+                    void row.offsetWidth; // force reflow
+                    row.classList.add('live-row-new');
+                } else {
+                    // Row not on board yet — prepend it
+                    const empty = document.getElementById('emptyRow');
+                    if (empty) empty.remove();
+                    const tr = document.createElement('tr');
+                    tr.setAttribute('data-id', msg.id);
+                    tr.classList.add('live-row-new');
+                    const t  = new Date(msg.startTime).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+                    tr.innerHTML = `
+                        <td>${t}</td>
+                        <td><code>${msg.referenceCode}</code></td>
+                        <td>${msg.patientName || ''}</td>
+                        <td>${msg.doctorName || ''}</td>
+                        <td><span class="status-badge status-${msg.newStatus}">${msg.newStatus}</span></td>`;
+                    body.prepend(tr);
+                }
+            });
+
+            conn.start()
+                .then(() => conn.invoke('JoinLiveBoard'))
+                .then(() => {
+                    status.className = 'badge bg-success p-2';
+                    status.innerHTML = '<i class="bi bi-wifi"></i> Live';
+                })
+                .catch(err => {
+                    console.error(err);
+                    status.className = 'badge bg-danger p-2';
+                    status.innerHTML = '<i class="bi bi-wifi-off"></i> Connection failed';
+                });
+        })();
+    </script>
+}

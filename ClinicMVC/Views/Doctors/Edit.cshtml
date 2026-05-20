@@ -1,0 +1,50 @@
+@model DoctorEditViewModel
+@{ ViewData["Title"] = "Edit Doctor"; var specs = (List<Specialization>)ViewBag.Specializations; }
+
+<h1 class="mb-3"><i class="bi bi-pencil"></i> Edit Doctor</h1>
+
+<div class="card p-4">
+    <form asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger" style="@(ViewData.ModelState.ErrorCount > 0 ? "" : "display:none")"></div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="FullName" class="form-label"></label>
+                <input asp-for="FullName" class="form-control" />
+                <span asp-validation-for="FullName" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="LicenseNumber" class="form-label"></label>
+                <input asp-for="LicenseNumber" class="form-control" />
+                <span asp-validation-for="LicenseNumber" class="text-danger small"></span>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Phone" class="form-label"></label>
+            <input asp-for="Phone" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Specializations</label>
+            <div>
+                @foreach (var s in specs)
+                {
+                    var isChecked = Model.SpecializationIds.Contains(s.Id);
+                    <div class="form-check form-check-inline">
+                        <input type="checkbox" name="SpecializationIds" value="@s.Id" class="form-check-input"
+                               id="spec-@s.Id" @(isChecked ? "checked" : "") />
+                        <label class="form-check-label" for="spec-@s.Id">@s.Name</label>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <button class="btn btn-primary" type="submit">Save</button>
+        <a class="btn btn-link" asp-action="Details" asp-route-id="@Model.Id">Cancel</a>
+    </form>
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }
