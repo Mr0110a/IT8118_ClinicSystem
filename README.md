@@ -1,1 +1,0 @@
-# IT8118_ClinicSystem
